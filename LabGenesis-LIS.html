@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab Genesis — Sistem Informasi Laboratorium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Bricolage+Grotesque:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --teal:        #0d7377;
+  --teal-d:      #094e52;
+  --teal-l:      #e0f5f5;
+  --teal-mid:    #14a0a5;
+  --mint:        #32ded4;
+  --amber:       #c4821a;
+  --amber-l:     #fdf3e0;
+  --red:         #b33a3a;
+  --red-l:       #fbeaea;
+  --green:       #277a3c;
+  --green-l:     #e4f5e9;
+  --bg:          #f2f4f7;
+  --surface:     #ffffff;
+  --surface2:    #f5f7fa;
+  --border:      rgba(0,0,0,0.07);
+  --border2:     rgba(0,0,0,0.12);
+  --text:        #141c24;
+  --text2:       #4a5568;
+  --text3:       #8a96a8;
+  --radius:      10px;
+  --radius-sm:   7px;
+  --shadow:      0 1px 4px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:   0 4px 16px rgba(0,0,0,0.10);
+  --sidebar-w:   228px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Bricolage Grotesque', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+/* === LAYOUT === */
+.app { display: flex; height: 100vh; overflow: hidden; }
+.sidebar { width: var(--sidebar-w); background: var(--teal-d); display: flex; flex-direction: column; flex-shrink: 0; }
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; height: 54px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.content-area { flex: 1; overflow-y: auto; padding: 24px; }
+
+/* === SIDEBAR === */
+.sb-logo { padding: 18px 16px 14px; display: flex; align-items: center; gap: 11px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.sb-icon { width: 36px; height: 36px; background: var(--mint); border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.sb-icon svg { width: 18px; height: 18px; stroke: var(--teal-d); fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.sb-name { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: -.2px; }
+.sb-ver  { font-size: 10px; color: rgba(255,255,255,.45); font-family: 'Geist Mono', monospace; }
+.sb-nav  { padding: 10px 8px; flex: 1; overflow-y: auto; }
+.sb-section { font-size: 9.5px; font-weight: 700; color: rgba(255,255,255,.35); letter-spacing: .08em; text-transform: uppercase; padding: 10px 10px 4px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; cursor: pointer; color: rgba(255,255,255,.6); font-size: 13px; font-weight: 500; margin-bottom: 2px; transition: all .15s; border: none; background: none; width: 100%; text-align: left; }
+.nav-item:hover { background: rgba(255,255,255,.08); color: #fff; }
+.nav-item.active { background: rgba(50,222,212,.15); color: var(--mint); }
+.nav-item svg { width: 15px; height: 15px; flex-shrink: 0; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.nav-badge { margin-left: auto; background: var(--mint); color: var(--teal-d); font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 999px; font-family: 'Geist Mono', monospace; }
+.nav-badge.warn { background: #f6a623; color: #fff; }
+.sb-footer { padding: 10px 8px; border-top: 1px solid rgba(255,255,255,.08); }
+.sb-footer .nav-item { color: rgba(255,255,255,.4); font-size: 12px; }
+.sb-footer .nav-item:hover { color: rgba(255,255,255,.7); }
+.sb-footer .nav-item.danger { color: rgba(220,80,80,.6); }
+.sb-footer .nav-item.danger:hover { color: rgba(220,80,80,.9); background: rgba(220,80,80,.08); }
+
+/* === TOPBAR === */
+.tb-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.tb-sub   { font-size: 11.5px; color: var(--text3); margin-left: 6px; }
+.tb-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.tb-date  { font-size: 12px; color: var(--text3); font-family: 'Geist Mono', monospace; }
+.tb-user  { display: flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: var(--radius-sm); background: var(--surface2); border: 1px solid var(--border2); font-size: 13px; font-weight: 500; }
+.avatar   { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, var(--teal), var(--mint)); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 700; }
+
+/* === SECTION === */
+.section { display: none; }
+.section.active { display: block; animation: fadeIn .2s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.pg-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.pg-title  { font-size: 19px; font-weight: 700; letter-spacing: -.3px; }
+.pg-sub    { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+/* === STAT CARDS === */
+.stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; position: relative; overflow: hidden; }
+.stat-card::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.stat-card.c-teal::after  { background: var(--teal); }
+.stat-card.c-amber::after { background: var(--amber); }
+.stat-card.c-green::after { background: var(--green); }
+.stat-card.c-red::after   { background: var(--red); }
+.stat-ic { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+.stat-ic.c-teal  { background: var(--teal-l); }
+.stat-ic.c-amber { background: var(--amber-l); }
+.stat-ic.c-green { background: var(--green-l); }
+.stat-ic.c-red   { background: var(--red-l); }
+.stat-ic svg { width: 17px; height: 17px; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.stat-ic.c-teal  svg { stroke: var(--teal); }
+.stat-ic.c-amber svg { stroke: var(--amber); }
+.stat-ic.c-green svg { stroke: var(--green); }
+.stat-ic.c-red   svg { stroke: var(--red); }
+.stat-num   { font-size: 30px; font-weight: 700; color: var(--text); font-family: 'Geist Mono', monospace; letter-spacing: -1px; }
+.stat-label { font-size: 11.5px; color: var(--text3); margin-top: 3px; }
+
+/* === CARD === */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; }
+.card-hdr { font-size: 12.5px; font-weight: 700; color: var(--text2); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: .04em; }
+.card-hdr svg { width: 14px; height: 14px; stroke: var(--teal); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+/* === FORM === */
+.fr { margin-bottom: 14px; }
+.fr label { display: block; font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 5px; letter-spacing: .01em; }
+.fr input, .fr select, .fr textarea {
+  width: 100%; padding: 9px 12px; border: 1px solid var(--border2); border-radius: var(--radius-sm);
+  font-size: 13px; background: var(--surface); color: var(--text); font-family: 'Bricolage Grotesque', sans-serif;
+  outline: none; transition: border-color .15s, box-shadow .15s;
+}
+.fr input:focus, .fr select:focus, .fr textarea:focus {
+  border-color: var(--teal); box-shadow: 0 0 0 3px rgba(13,115,119,.12);
+}
+.fr textarea { resize: vertical; min-height: 78px; line-height: 1.5; }
+.req { color: var(--red); }
+
+/* === BUTTONS === */
+.btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; font-family: 'Bricolage Grotesque', sans-serif; letter-spacing: -.1px; }
+.btn:active { transform: scale(.98); }
+.btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.btn-primary   { background: var(--teal); color: white; }
+.btn-primary:hover { background: var(--teal-d); }
+.btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); }
+.btn-secondary:hover { background: #eaedf2; }
+.btn-ghost     { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
+.btn-ghost:hover { background: var(--surface2); }
+.btn-danger    { background: var(--red-l); color: var(--red); border: 1px solid rgba(179,58,58,.2); }
+.btn-danger:hover { background: #f4d0d0; }
+.btn-success   { background: var(--green-l); color: var(--green); border: 1px solid rgba(39,122,60,.2); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+/* === TABLE === */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead th { text-align: left; padding: 10px 14px; font-size: 10.5px; font-weight: 700; color: var(--text3); border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; }
+tbody td { padding: 11px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: #f8fafa; }
+
+/* === BADGE === */
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+.badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.badge-pending { background: var(--amber-l); color: var(--amber); }
+.badge-pending::before { background: var(--amber); }
+.badge-proses  { background: var(--teal-l); color: var(--teal); }
+.badge-proses::before { background: var(--teal); }
+.badge-selesai { background: var(--green-l); color: var(--green); }
+.badge-selesai::before { background: var(--green); }
+.badge-cito    { background: var(--red-l); color: var(--red); font-size: 10px; }
+.badge-cito::before { background: var(--red); }
+
+/* === SEARCH === */
+.search-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+.s-input { flex: 1; display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 0 12px; }
+.s-input svg { width: 14px; height: 14px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+.s-input input { flex: 1; border: none; outline: none; font-size: 13px; background: transparent; color: var(--text); padding: 9px 0; font-family: 'Bricolage Grotesque', sans-serif; }
+.search-bar select { padding: 9px 12px; border: 1px solid var(--border2); border-radius: var(--radius-sm); font-size: 13px; background: var(--surface); color: var(--text); outline: none; font-family: 'Bricolage Grotesque', sans-serif; }
+
+/* === MODAL === */
+.modal-bd { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); }
+.modal-bd.open { display: flex; }
+.modal { background: var(--surface); border-radius: 14px; width: 100%; max-width: 580px; max-height: 88vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.2); border: 1px solid var(--border); }
+.modal-hdr { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--surface); z-index: 1; }
+.modal-hdr h3 { font-size: 15px; font-weight: 700; }
+.modal-close { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; background: none; border: none; cursor: pointer; color: var(--text3); font-size: 16px; transition: background .15s; }
+.modal-close:hover { background: var(--surface2); color: var(--text); }
+.modal-body { padding: 20px; }
+.modal-ftr { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; position: sticky; bottom: 0; background: var(--surface); }
+
+/* === RESULT PANEL === */
+.rpg { border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 12px; overflow: hidden; }
+.rpg-hdr { background: var(--surface2); padding: 9px 14px; font-size: 11.5px; font-weight: 700; color: var(--text2); display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: .04em; }
+.rpg-hdr svg { width: 13px; height: 13px; stroke: var(--teal); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.rrow { display: grid; grid-template-columns: 1.8fr 1fr 1fr 1fr; gap: 10px; padding: 9px 14px; align-items: center; border-bottom: 1px solid var(--border); }
+.rrow:last-child { border-bottom: none; }
+.rrow-hdr { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text3); padding: 6px 14px; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1.8fr 1fr 1fr 1fr; gap: 10px; }
+.rname { font-weight: 500; font-size: 13px; }
+.flag-h { color: var(--red); font-weight: 700; }
+.flag-l { color: var(--teal); font-weight: 700; }
+.flag-n { color: var(--green); }
+
+/* === INFO GRID === */
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 16px; }
+.info-cell { padding: 10px 14px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
+.info-cell:nth-child(even) { border-right: none; }
+.info-cell:nth-last-child(-n+2) { border-bottom: none; }
+.info-lbl { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--text3); margin-bottom: 3px; }
+.info-val { font-size: 13px; font-weight: 600; color: var(--text); }
+
+/* === MISC === */
+.rm-tag { font-family: 'Geist Mono', monospace; font-size: 11px; background: var(--surface2); border: 1px solid var(--border); padding: 2px 7px; border-radius: 4px; color: var(--text2); }
+.empty-st { text-align: center; padding: 48px 24px; color: var(--text3); }
+.empty-st svg { width: 46px; height: 46px; stroke: var(--border2); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; margin-bottom: 12px; }
+.empty-st p { font-size: 13px; }
+.alert { padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; margin-bottom: 14px; display: flex; align-items: flex-start; gap: 9px; }
+.alert svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; margin-top: 1px; }
+.alert-info { background: var(--teal-l); color: var(--teal-d); border: 1px solid rgba(13,115,119,.2); }
+.act-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+.act-item:last-child { border-bottom: none; }
+.act-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); flex-shrink: 0; margin-top: 5px; }
+.act-text { flex: 1; color: var(--text2); line-height: 1.5; }
+.act-time { color: var(--text3); white-space: nowrap; font-family: 'Geist Mono', monospace; font-size: 11px; }
+.panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.panel-chk { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid var(--border2); border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; transition: all .15s; user-select: none; }
+.panel-chk:hover { border-color: var(--teal); background: var(--teal-l); }
+.panel-chk input { width: 14px; height: 14px; accent-color: var(--teal); cursor: pointer; }
+.scrollable { max-height: 500px; overflow-y: auto; }
+.mono { font-family: 'Geist Mono', monospace; }
+
+/* === TOAST === */
+.toast-wrap { position: fixed; bottom: 24px; right: 24px; z-index: 999; display: flex; flex-direction: column; gap: 8px; }
+.toast { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: var(--radius); background: var(--teal-d); color: white; font-size: 13px; font-weight: 500; box-shadow: var(--shadow-md); animation: slideIn .25s ease; max-width: 320px; }
+.toast.err { background: var(--red); }
+.toast svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+/* === PRINT === */
+@media print {
+  .sidebar, .topbar, .no-print { display: none !important; }
+  .app { display: block; height: auto; }
+  .content-area { padding: 0; overflow: visible; }
+  .section { display: block !important; }
+  .section:not(.print-target) { display: none !important; }
+  .card { box-shadow: none; }
+  table { font-size: 11px; }
+}
+
+/* === DIVIDER BADGE IN ANALIS SELECT === */
+.analis-group { font-weight: 700; color: var(--text3); font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-icon">
+        <svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-4"/><polyline points="20,4 12,12 8,8"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+      </div>
+      <div>
+        <div class="sb-name">Lab Genesis</div>
+        <div class="sb-ver">LIS v2.0</div>
+      </div>
+    </div>
+
+    <nav class="sb-nav">
+      <div class="sb-section">Utama</div>
+      <button class="nav-item active" onclick="showSection('dashboard')" id="nav-dashboard">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-item" onclick="showSection('pasien')" id="nav-pasien">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Data Pasien
+        <span class="nav-badge" id="badge-pasien">0</span>
+      </button>
+      <button class="nav-item" onclick="showSection('order')" id="nav-order">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Order Pemeriksaan
+        <span class="nav-badge warn" id="badge-order">0</span>
+      </button>
+      <button class="nav-item" onclick="showSection('hasil')" id="nav-hasil">
+        <svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-4"/><polyline points="20,4 12,12 8,8"/></svg>
+        Input Hasil Lab
+      </button>
+      <button class="nav-item" onclick="showSection('riwayat')" id="nav-riwayat">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+        Riwayat Hasil
+      </button>
+      <div class="sb-section" style="margin-top:8px">Laporan</div>
+      <button class="nav-item" onclick="showSection('laporan')" id="nav-laporan">
+        <svg viewBox="0 0 24 24"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+        Statistik & Laporan
+      </button>
+    </nav>
+
+    <div class="sb-footer">
+      <button class="nav-item" onclick="eksporData()">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Ekspor JSON
+      </button>
+      <button class="nav-item danger" onclick="confirmReset()">
+        <svg viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6"/><path d="M19,6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3,0V4a2 2 0 012-2h4a2 2 0 012,2v2"/></svg>
+        Reset Data
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <span class="tb-title" id="tb-title">Dashboard</span>
+        <span class="tb-sub" id="tb-sub">Ringkasan sistem</span>
+      </div>
+      <div class="tb-right">
+        <span class="tb-date" id="tb-date"></span>
+        <div class="tb-user">
+          <div class="avatar">LA</div>
+          <span>Lab Admin</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-area">
+
+      <!-- ========== DASHBOARD ========== -->
+      <div class="section active" id="section-dashboard">
+        <div class="stat-grid">
+          <div class="stat-card c-teal">
+            <div class="stat-ic c-teal"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+            <div class="stat-num" id="s-pasien">0</div>
+            <div class="stat-label">Total Pasien Terdaftar</div>
+          </div>
+          <div class="stat-card c-amber">
+            <div class="stat-ic c-amber"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg></div>
+            <div class="stat-num" id="s-order-today">0</div>
+            <div class="stat-label">Order Hari Ini</div>
+          </div>
+          <div class="stat-card c-green">
+            <div class="stat-ic c-green"><svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg></div>
+            <div class="stat-num" id="s-selesai">0</div>
+            <div class="stat-label">Hasil Selesai</div>
+          </div>
+          <div class="stat-card c-red">
+            <div class="stat-ic c-red"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+            <div class="stat-num" id="s-pending">0</div>
+            <div class="stat-label">Order Pending</div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-hdr"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>Order Terbaru</div>
+            <div id="dash-orders"></div>
+          </div>
+          <div class="card">
+            <div class="card-hdr"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Log Aktivitas</div>
+            <div id="dash-activity"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== PASIEN ========== -->
+      <div class="section" id="section-pasien">
+        <div class="pg-header">
+          <div>
+            <div class="pg-title">Data Pasien</div>
+            <div class="pg-sub" id="pasien-count"></div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modal-pasien')">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Daftar Pasien Baru
+          </button>
+        </div>
+        <div class="search-bar">
+          <div class="s-input">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="q-pasien" placeholder="Cari nama, No. RM, atau telepon…" oninput="renderPasien()">
+          </div>
+          <select id="f-jk" onchange="renderPasien()">
+            <option value="">Semua JK</option>
+            <option>Laki-laki</option>
+            <option>Perempuan</option>
+          </select>
+        </div>
+        <div class="card" style="padding:0">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th>No. RM</th><th>Nama Pasien</th><th>Tgl Lahir / Usia</th><th>JK</th><th>Telepon</th><th>Alergi</th><th>Terakhir Periksa</th><th class="no-print">Aksi</th>
+              </tr></thead>
+              <tbody id="pasien-tb"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== ORDER ========== -->
+      <div class="section" id="section-order">
+        <div class="pg-header">
+          <div>
+            <div class="pg-title">Order Pemeriksaan</div>
+            <div class="pg-sub" id="order-count"></div>
+          </div>
+          <button class="btn btn-primary" onclick="openOrderModal()">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Buat Order Baru
+          </button>
+        </div>
+        <div class="search-bar">
+          <div class="s-input">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="q-order" placeholder="Cari pasien atau nomor order…" oninput="renderOrder()">
+          </div>
+          <select id="f-order-st" onchange="renderOrder()">
+            <option value="">Semua Status</option>
+            <option value="pending">Pending</option>
+            <option value="proses">Diproses</option>
+            <option value="selesai">Selesai</option>
+          </select>
+          <select id="f-prio" onchange="renderOrder()">
+            <option value="">Semua Prioritas</option>
+            <option value="Rutin">Rutin</option>
+            <option value="STAT (Cito)">STAT / Cito</option>
+          </select>
+        </div>
+        <div class="card" style="padding:0">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th>No. Order</th><th>Pasien</th><th>Panel</th><th>Tgl Order</th><th>Dokter Pengirim</th><th>Analis</th><th>Prioritas</th><th>Status</th><th class="no-print">Aksi</th>
+              </tr></thead>
+              <tbody id="order-tb"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== INPUT HASIL ========== -->
+      <div class="section" id="section-hasil">
+        <div class="pg-header">
+          <div>
+            <div class="pg-title">Input Hasil Laboratorium</div>
+            <div class="pg-sub">Pilih order untuk memasukkan nilai pemeriksaan</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="fr">
+            <label>Pilih Nomor Order <span class="req">*</span></label>
+            <select id="sel-order-hasil" onchange="loadOrderPanel()" style="max-width:520px">
+              <option value="">— Pilih nomor order —</option>
+            </select>
+          </div>
+          <div id="hasil-area"></div>
+        </div>
+      </div>
+
+      <!-- ========== RIWAYAT ========== -->
+      <div class="section" id="section-riwayat">
+        <div class="pg-header">
+          <div>
+            <div class="pg-title">Riwayat Hasil Laboratorium</div>
+            <div class="pg-sub" id="riwayat-count"></div>
+          </div>
+        </div>
+        <div class="search-bar">
+          <div class="s-input">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="q-riwayat" placeholder="Cari nama pasien atau nomor order…" oninput="renderRiwayat()">
+          </div>
+        </div>
+        <div class="card" style="padding:0">
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th>No. Order</th><th>Pasien</th><th>Panel Diperiksa</th><th>Tgl Hasil</th><th>Dokter Pengirim</th><th>Analis Pemeriksa</th><th>Status</th><th>Aksi</th>
+              </tr></thead>
+              <tbody id="riwayat-tb"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== LAPORAN ========== -->
+      <div class="section" id="section-laporan">
+        <div class="pg-header">
+          <div>
+            <div class="pg-title">Statistik & Laporan</div>
+            <div class="pg-sub">Ringkasan data laboratorium</div>
+          </div>
+          <button class="btn btn-secondary" onclick="window.print()">
+            <svg viewBox="0 0 24 24"><polyline points="6,9 6,2 18,2 18,9"/><path d="M6,18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            Cetak Laporan
+          </button>
+        </div>
+        <div id="laporan-content"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL PASIEN ===== -->
+<div class="modal-bd" id="modal-pasien">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3>Daftarkan Pasien Baru</h3>
+      <button class="modal-close" onclick="closeModal('modal-pasien')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="grid-2">
+        <div class="fr"><label>Nama Lengkap <span class="req">*</span></label><input type="text" id="p-nama" placeholder="Sesuai KTP"></div>
+        <div class="fr"><label>NIK</label><input type="text" id="p-nik" placeholder="16 digit" maxlength="16"></div>
+      </div>
+      <div class="grid-2">
+        <div class="fr"><label>Tanggal Lahir <span class="req">*</span></label><input type="date" id="p-tgl"></div>
+        <div class="fr"><label>Jenis Kelamin <span class="req">*</span></label>
+          <select id="p-jk"><option value="">— Pilih —</option><option>Laki-laki</option><option>Perempuan</option></select>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="fr"><label>Nomor Telepon</label><input type="tel" id="p-telp" placeholder="08xx-xxxx-xxxx"></div>
+        <div class="fr"><label>Golongan Darah</label>
+          <select id="p-darah"><option value="">Tidak diketahui</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select>
+        </div>
+      </div>
+      <div class="fr"><label>Penjamin / Asuransi</label>
+        <select id="p-penjamin"><option value="">Umum / Pribadi</option><option>BPJS Kesehatan</option><option>Asuransi Swasta</option><option>Perusahaan</option></select>
+      </div>
+      <div class="fr"><label>Alamat</label><textarea id="p-alamat" placeholder="Alamat lengkap"></textarea></div>
+      <div class="fr"><label>Riwayat Alergi / Kondisi Khusus</label><input type="text" id="p-alergi" placeholder="Contoh: alergi penisilin, diabetes, hipertensi"></div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn btn-ghost" onclick="closeModal('modal-pasien')">Batal</button>
+      <button class="btn btn-primary" onclick="simpanPasien()">
+        <svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>
+        Simpan Pasien
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL ORDER ===== -->
+<div class="modal-bd" id="modal-order">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-hdr">
+      <h3>Buat Order Pemeriksaan Baru</h3>
+      <button class="modal-close" onclick="closeModal('modal-order')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fr"><label>Pasien <span class="req">*</span></label>
+        <select id="o-pasien"><option value="">— Pilih pasien —</option></select>
+      </div>
+      <div class="grid-2">
+        <div class="fr"><label>Dokter Pengirim <span class="req">*</span></label><input type="text" id="o-dokter" placeholder="dr. Nama Dokter, Sp.PD"></div>
+        <div class="fr"><label>Prioritas</label>
+          <select id="o-prioritas"><option>Rutin</option><option>STAT (Cito)</option></select>
+        </div>
+      </div>
+      <div class="fr"><label>Petugas Analis Pemeriksa <span class="req">*</span></label>
+        <select id="o-analis">
+          <option value="">— Pilih Analis —</option>
+          <optgroup label="Analis Medis">
+            <option>Andi Kurniawan, A.Md.AK</option>
+            <option>Sari Dewi Lestari, A.Md.AK</option>
+            <option>Budi Santoso, S.Tr.AK</option>
+            <option>Fitria Rahmawati, A.Md.AK</option>
+            <option>Hendra Wijaya, A.Md.AK</option>
+          </optgroup>
+          <optgroup label="Supervisor">
+            <option>dr. Ratna Kusuma, Sp.PK</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="fr">
+        <label>Panel Pemeriksaan <span class="req">*</span></label>
+        <div class="panel-grid" id="panel-checks" style="margin-top:6px"></div>
+      </div>
+      <div class="fr"><label>Diagnosa / Catatan Klinis</label><textarea id="o-catatan" placeholder="Diagnosa sementara atau catatan untuk analis"></textarea></div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn btn-ghost" onclick="closeModal('modal-order')">Batal</button>
+      <button class="btn btn-primary" onclick="simpanOrder()">
+        <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg>
+        Buat Order
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL DETAIL HASIL ===== -->
+<div class="modal-bd" id="modal-detail">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-hdr">
+      <div>
+        <h3 id="det-title">Detail Hasil Laboratorium</h3>
+        <div id="det-sub" style="font-size:12px;color:var(--text3);margin-top:2px"></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-sm btn-secondary no-print" onclick="cetakHasil()">
+          <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="6,9 6,2 18,2 18,9"/><path d="M6,18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Cetak
+        </button>
+        <button class="modal-close" onclick="closeModal('modal-detail')">✕</button>
+      </div>
+    </div>
+    <div class="modal-body scrollable" id="det-body"></div>
+    <div class="modal-ftr">
+      <button class="btn btn-ghost" onclick="closeModal('modal-detail')">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+// ===================== DB =====================
+const DB = {
+  pasien:[], orders:[], hasil:[], activity:[],
+  load() {
+    try {
+      this.pasien   = JSON.parse(localStorage.getItem('lg_pasien')||'[]');
+      this.orders   = JSON.parse(localStorage.getItem('lg_orders')||'[]');
+      this.hasil    = JSON.parse(localStorage.getItem('lg_hasil')||'[]');
+      this.activity = JSON.parse(localStorage.getItem('lg_activity')||'[]');
+    } catch(e){}
+  },
+  save() {
+    try {
+      localStorage.setItem('lg_pasien',   JSON.stringify(this.pasien));
+      localStorage.setItem('lg_orders',   JSON.stringify(this.orders));
+      localStorage.setItem('lg_hasil',    JSON.stringify(this.hasil));
+      localStorage.setItem('lg_activity', JSON.stringify(this.activity));
+    } catch(e){ toast('Penyimpanan lokal penuh','err'); }
+  }
+};
+DB.load();
+
+// ===================== PANELS & NORMALS =====================
+const PANELS = {
+  'Darah Lengkap':  ['Hemoglobin','Hematokrit','Leukosit','Trombosit','Eritrosit','MCV','MCH','MCHC'],
+  'Kimia Darah':    ['Glukosa Puasa','Glukosa 2jpp','HbA1c','Kolesterol Total','Trigliserida','HDL','LDL'],
+  'Fungsi Ginjal':  ['Ureum','Kreatinin','Asam Urat','eGFR'],
+  'Fungsi Hati':    ['SGOT','SGPT','Albumin','Bilirubin Total','Bilirubin Direk','Fosfatase Alkali'],
+  'Elektrolit':     ['Natrium','Kalium','Klorida','Kalsium'],
+  'Thyroid':        ['TSH','FT4','FT3'],
+  'Urinalisis':     ['pH Urine','Protein Urine','Glukosa Urine','Keton','Eritrosit Urine','Leukosit Urine'],
+  'Serologi':       ['HBsAg','Anti-HBs','Anti-HCV','VDRL/RPR','Widal S. typhi O','Widal S. typhi H']
+};
+const NORMAL = {
+  'Hemoglobin':{min:12,max:17,unit:'g/dL'},'Hematokrit':{min:36,max:50,unit:'%'},
+  'Leukosit':{min:4,max:10,unit:'ribu/µL'},'Trombosit':{min:150,max:400,unit:'ribu/µL'},
+  'Eritrosit':{min:3.5,max:5.5,unit:'juta/µL'},'MCV':{min:80,max:100,unit:'fL'},
+  'MCH':{min:27,max:32,unit:'pg'},'MCHC':{min:32,max:36,unit:'g/dL'},
+  'Glukosa Puasa':{min:70,max:100,unit:'mg/dL'},'Glukosa 2jpp':{min:70,max:140,unit:'mg/dL'},
+  'HbA1c':{min:4,max:5.7,unit:'%'},'Kolesterol Total':{min:0,max:200,unit:'mg/dL'},
+  'Trigliserida':{min:0,max:150,unit:'mg/dL'},'HDL':{min:40,max:999,unit:'mg/dL'},
+  'LDL':{min:0,max:130,unit:'mg/dL'},'Ureum':{min:7,max:25,unit:'mg/dL'},
+  'Kreatinin':{min:0.6,max:1.3,unit:'mg/dL'},'Asam Urat':{min:2.4,max:7.0,unit:'mg/dL'},
+  'eGFR':{min:60,max:999,unit:'mL/min/1.73m²'},'SGOT':{min:0,max:40,unit:'U/L'},
+  'SGPT':{min:0,max:41,unit:'U/L'},'Albumin':{min:3.5,max:5.0,unit:'g/dL'},
+  'Bilirubin Total':{min:0,max:1.0,unit:'mg/dL'},'Bilirubin Direk':{min:0,max:0.3,unit:'mg/dL'},
+  'Fosfatase Alkali':{min:44,max:147,unit:'U/L'},'Natrium':{min:136,max:145,unit:'mmol/L'},
+  'Kalium':{min:3.5,max:5.0,unit:'mmol/L'},'Klorida':{min:98,max:107,unit:'mmol/L'},
+  'Kalsium':{min:8.5,max:10.5,unit:'mg/dL'},'TSH':{min:0.4,max:4.0,unit:'mIU/L'},
+  'FT4':{min:9,max:25,unit:'pmol/L'},'FT3':{min:3.5,max:7.8,unit:'pmol/L'},
+  'pH Urine':{min:4.5,max:8.0,unit:''},'Eritrosit Urine':{min:0,max:3,unit:'/LPB'},
+  'Leukosit Urine':{min:0,max:5,unit:'/LPB'}
+};
+const KUAL = ['Protein Urine','Glukosa Urine','Keton','HBsAg','Anti-HBs','Anti-HCV','VDRL/RPR','Widal S. typhi O','Widal S. typhi H'];
+
+// ===================== HELPERS =====================
+function rmGen()    { return 'RM-' + String(Date.now()).slice(-7); }
+function ordGen()   { const d=new Date(); return 'ORD-'+d.toISOString().slice(0,10).replace(/-/g,'')+'-'+Math.floor(Math.random()*900+100); }
+function fmtD(s)    { if(!s) return '—'; return new Date(s).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}); }
+function fmtDT(s)   { if(!s) return '—'; return new Date(s).toLocaleString('id-ID',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function usia(t)    { if(!t) return ''; const d=new Date(t),n=new Date(); let a=n.getFullYear()-d.getFullYear(); if(n<new Date(n.getFullYear(),d.getMonth(),d.getDate()))a--; return a+' th'; }
+function fcls(name,val){ const n=NORMAL[name]; if(!n||isNaN(parseFloat(val)))return ''; const v=parseFloat(val); if(v>n.max)return 'flag-h'; if(v<n.min)return 'flag-l'; return 'flag-n'; }
+function flbl(name,val){ const f=fcls(name,val); return f==='flag-h'?'↑':f==='flag-l'?'↓':''; }
+function nrange(name)  { const n=NORMAL[name]; if(!n) return 'Lihat ref'; return `${n.min} – ${n.max===999?'↑':n.max}`; }
+function esc(s)        { return s.replace(/[^a-zA-Z0-9]/g,'_'); }
+function addAct(msg)   { DB.activity.unshift({msg,time:new Date().toISOString()}); if(DB.activity.length>50) DB.activity.pop(); }
+function toast(msg,type='ok'){
+  const el=document.createElement('div'); el.className='toast'+(type==='err'?' err':'');
+  const ic=type==='err'
+    ?'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'
+    :'<svg viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg>';
+  el.innerHTML=ic+msg; document.getElementById('toast-wrap').appendChild(el);
+  setTimeout(()=>el.remove(),3200);
+}
+
+// ===================== NAV =====================
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('section-'+id).classList.add('active');
+  document.getElementById('nav-'+id).classList.add('active');
+  const T={dashboard:'Dashboard',pasien:'Data Pasien',order:'Order Pemeriksaan',hasil:'Input Hasil Lab',riwayat:'Riwayat Hasil',laporan:'Statistik & Laporan'};
+  const S={dashboard:'Ringkasan sistem',pasien:'Kelola data pasien',order:'Kelola order pemeriksaan',hasil:'Input nilai pemeriksaan',riwayat:'Arsip hasil laboratorium',laporan:'Analisis & statistik'};
+  document.getElementById('tb-title').textContent = T[id]||id;
+  document.getElementById('tb-sub').textContent   = S[id]||'';
+  if(id==='dashboard') renderDash();
+  if(id==='pasien')    { renderPasien(); }
+  if(id==='order')     { renderOrder(); populatePasienSel(); }
+  if(id==='hasil')     { populateOrderHasilSel(); }
+  if(id==='riwayat')   renderRiwayat();
+  if(id==='laporan')   renderLaporan();
+  updateBadges();
+}
+
+function updateBadges() {
+  document.getElementById('badge-pasien').textContent = DB.pasien.length;
+  document.getElementById('badge-order').textContent  = DB.orders.filter(o=>o.status==='pending').length;
+}
+
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ===================== DASHBOARD =====================
+function renderDash() {
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById('s-pasien').textContent      = DB.pasien.length;
+  document.getElementById('s-order-today').textContent = DB.orders.filter(o=>o.tgl.startsWith(today)).length;
+  document.getElementById('s-selesai').textContent     = DB.hasil.length;
+  document.getElementById('s-pending').textContent     = DB.orders.filter(o=>o.status==='pending').length;
+
+  const ro = [...DB.orders].reverse().slice(0,6);
+  const dOrd = document.getElementById('dash-orders');
+  if(!ro.length) { dOrd.innerHTML='<div class="empty-st" style="padding:24px"><p>Belum ada order</p></div>'; }
+  else dOrd.innerHTML = ro.map(o=>{
+    const p=DB.pasien.find(x=>x.id===o.pasienId);
+    return `<div class="act-item">
+      <div class="act-dot" style="background:${o.status==='selesai'?'var(--green)':o.status==='proses'?'var(--teal)':'var(--amber)'}"></div>
+      <div class="act-text"><strong>${p?p.nama:'—'}</strong> · ${o.panels.join(', ')}<br><span style="color:var(--text3);font-size:11px">Dokter: ${o.dokter||'—'} · Analis: ${o.analis||'—'}</span></div>
+      <span class="badge badge-${o.status}" style="margin-left:8px;align-self:flex-start">${o.status==='selesai'?'Selesai':o.status==='proses'?'Proses':'Pending'}</span>
+    </div>`;
+  }).join('');
+
+  const dAct = document.getElementById('dash-activity');
+  if(!DB.activity.length) { dAct.innerHTML='<div class="empty-st" style="padding:24px"><p>Belum ada aktivitas</p></div>'; }
+  else dAct.innerHTML = DB.activity.slice(0,8).map(a=>`<div class="act-item">
+    <div class="act-dot"></div>
+    <div class="act-text">${a.msg}</div>
+    <div class="act-time">${fmtD(a.time)}</div>
+  </div>`).join('');
+}
+
+// ===================== PASIEN =====================
+function renderPasien() {
+  const q=(document.getElementById('q-pasien').value||'').toLowerCase();
+  const jk=document.getElementById('f-jk').value;
+  let list=DB.pasien.filter(p=>{
+    const m=!q||p.nama.toLowerCase().includes(q)||p.rm.toLowerCase().includes(q)||(p.telp||'').includes(q);
+    return m&&(!jk||p.jk===jk);
+  });
+  document.getElementById('pasien-count').textContent=`${list.length} dari ${DB.pasien.length} pasien`;
+  const tb=document.getElementById('pasien-tb');
+  if(!list.length){tb.innerHTML=`<tr><td colspan="8"><div class="empty-st"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><p>${q?'Pasien tidak ditemukan':'Belum ada pasien. Klik "Daftar Pasien Baru" untuk memulai.'}</p></div></td></tr>`;return;}
+  tb.innerHTML=list.map(p=>`<tr>
+    <td><span class="rm-tag">${p.rm}</span></td>
+    <td><div style="font-weight:600">${p.nama}</div>${p.nik?`<div style="font-size:11px;color:var(--text3)">NIK: ${p.nik}</div>`:''}</td>
+    <td>${fmtD(p.tgl)}<div style="font-size:11px;color:var(--text3)">${usia(p.tgl)}</div></td>
+    <td>${p.jk==='Laki-laki'?'♂ L':'♀ P'}</td>
+    <td>${p.telp||'—'}</td>
+    <td>${p.alergi?`<span style="font-size:12px;color:var(--red)">⚠ ${p.alergi}</span>`:'<span style="color:var(--text3)">—</span>'}</td>
+    <td>${p.lastVisit?fmtD(p.lastVisit):'<span style="color:var(--text3)">Belum periksa</span>'}</td>
+    <td style="white-space:nowrap">
+      <button class="btn btn-sm btn-secondary" onclick="buatOrderDari('${p.id}')">Order</button>
+      <button class="btn btn-sm btn-danger" onclick="hapusPasien('${p.id}')" style="margin-left:4px">Hapus</button>
+    </td>
+  </tr>`).join('');
+}
+
+function populatePasienSel() {
+  const s=document.getElementById('o-pasien');
+  s.innerHTML='<option value="">— Pilih pasien —</option>'+DB.pasien.map(p=>`<option value="${p.id}">${p.nama} (${p.rm})</option>`).join('');
+}
+
+function buatOrderDari(id) {
+  showSection('order');
+  setTimeout(()=>{ openOrderModal(); document.getElementById('o-pasien').value=id; }, 150);
+}
+
+function hapusPasien(id) {
+  const p=DB.pasien.find(x=>x.id===id);
+  if(!confirm(`Hapus pasien ${p?p.nama:'ini'}? Semua order terkait juga akan dihapus.`)) return;
+  DB.pasien=DB.pasien.filter(x=>x.id!==id);
+  DB.orders=DB.orders.filter(x=>x.pasienId!==id);
+  DB.hasil=DB.hasil.filter(x=>x.pasienId!==id);
+  DB.save(); addAct(`Pasien dihapus: ${p?p.nama:'—'}`);
+  renderPasien(); updateBadges();
+  toast(`Pasien ${p?p.nama:''} dihapus`,'err');
+}
+
+function simpanPasien() {
+  const nama=document.getElementById('p-nama').value.trim();
+  const tgl=document.getElementById('p-tgl').value;
+  const jk=document.getElementById('p-jk').value;
+  if(!nama||!tgl||!jk){toast('Nama, tanggal lahir, dan JK wajib diisi!','err');return;}
+  const p={
+    id:'p-'+Date.now(), rm:rmGen(), nama, nik:document.getElementById('p-nik').value,
+    tgl, jk, telp:document.getElementById('p-telp').value, darah:document.getElementById('p-darah').value,
+    penjamin:document.getElementById('p-penjamin').value, alamat:document.getElementById('p-alamat').value,
+    alergi:document.getElementById('p-alergi').value, createdAt:new Date().toISOString(), lastVisit:null
+  };
+  DB.pasien.push(p); DB.save();
+  addAct(`Pasien baru: ${nama} (${p.rm})`);
+  closeModal('modal-pasien');
+  ['p-nama','p-nik','p-tgl','p-jk','p-telp','p-darah','p-penjamin','p-alamat','p-alergi'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  renderPasien(); updateBadges();
+  toast(`Pasien ${nama} berhasil didaftarkan — ${p.rm}`);
+}
+
+// ===================== ORDER =====================
+function buildPanelChecks() {
+  document.getElementById('panel-checks').innerHTML=Object.keys(PANELS).map(panel=>`<label class="panel-chk"><input type="checkbox" name="panel" value="${panel}"> ${panel}</label>`).join('');
+}
+
+function openOrderModal() {
+  populatePasienSel(); buildPanelChecks(); openModal('modal-order');
+}
+
+function renderOrder() {
+  const q=(document.getElementById('q-order').value||'').toLowerCase();
+  const fs=document.getElementById('f-order-st').value;
+  const fp=document.getElementById('f-prio').value;
+  let list=[...DB.orders].reverse().filter(o=>{
+    const p=DB.pasien.find(x=>x.id===o.pasienId);
+    const nm=(p?p.nama:'').toLowerCase();
+    return(!q||nm.includes(q)||o.id.toLowerCase().includes(q))&&(!fs||o.status===fs)&&(!fp||o.prioritas===fp);
+  });
+  document.getElementById('order-count').textContent=`${list.length} dari ${DB.orders.length} order`;
+  const tb=document.getElementById('order-tb');
+  if(!list.length){tb.innerHTML=`<tr><td colspan="9"><div class="empty-st"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg><p>Belum ada order pemeriksaan</p></div></td></tr>`;return;}
+  tb.innerHTML=list.map(o=>{
+    const p=DB.pasien.find(x=>x.id===o.pasienId);
+    return `<tr>
+      <td><span class="rm-tag">${o.id}</span></td>
+      <td>${p?`<div style="font-weight:600">${p.nama}</div><div style="font-size:11px;color:var(--text3)">${p.rm}</div>`:'—'}</td>
+      <td style="max-width:160px"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.panels.join(', ')}</div></td>
+      <td class="mono" style="font-size:12px">${fmtD(o.tgl)}</td>
+      <td style="font-size:12px">${o.dokter||'—'}</td>
+      <td style="font-size:12px">${o.analis||'—'}</td>
+      <td>${o.prioritas==='STAT (Cito)'?'<span class="badge badge-cito">⚡ CITO</span>':'<span style="font-size:12px;color:var(--text3)">Rutin</span>'}</td>
+      <td><span class="badge badge-${o.status}">${o.status==='selesai'?'Selesai':o.status==='proses'?'Diproses':'Pending'}</span></td>
+      <td style="white-space:nowrap">
+        ${o.status!=='selesai'?`<button class="btn btn-sm btn-success" onclick="goInputHasil('${o.id}')">Input Hasil</button>`:''}
+        <button class="btn btn-sm btn-danger" onclick="hapusOrder('${o.id}')" style="margin-left:4px">Hapus</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function simpanOrder() {
+  const pid=document.getElementById('o-pasien').value;
+  const dokter=document.getElementById('o-dokter').value.trim();
+  const analis=document.getElementById('o-analis').value;
+  const checked=Array.from(document.querySelectorAll('input[name="panel"]:checked')).map(x=>x.value);
+  if(!pid){toast('Pilih pasien terlebih dahulu!','err');return;}
+  if(!dokter){toast('Nama dokter pengirim wajib diisi!','err');return;}
+  if(!analis){toast('Pilih petugas analis pemeriksa!','err');return;}
+  if(!checked.length){toast('Pilih minimal satu panel pemeriksaan!','err');return;}
+  const o={
+    id:ordGen(), pasienId:pid, panels:checked, dokter, analis,
+    prioritas:document.getElementById('o-prioritas').value,
+    catatan:document.getElementById('o-catatan').value,
+    tgl:new Date().toISOString(), status:'pending'
+  };
+  DB.orders.push(o);
+  const p=DB.pasien.find(x=>x.id===pid);
+  if(p) p.lastVisit=o.tgl;
+  DB.save(); addAct(`Order baru: ${o.id} — ${p?p.nama:'?'} · Dokter: ${dokter} · Analis: ${analis}`);
+  closeModal('modal-order');
+  ['o-pasien','o-dokter','o-analis','o-catatan'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  renderOrder(); updateBadges();
+  toast(`Order ${o.id} berhasil dibuat`);
+}
+
+function hapusOrder(id) {
+  if(!confirm('Hapus order ini?')) return;
+  DB.orders=DB.orders.filter(o=>o.id!==id);
+  DB.hasil=DB.hasil.filter(h=>h.orderId!==id);
+  DB.save(); renderOrder(); updateBadges();
+  toast('Order dihapus','err');
+}
+
+function goInputHasil(oid) {
+  showSection('hasil');
+  setTimeout(()=>{ populateOrderHasilSel(); document.getElementById('sel-order-hasil').value=oid; loadOrderPanel(); }, 150);
+}
+
+// ===================== INPUT HASIL =====================
+function populateOrderHasilSel() {
+  const s=document.getElementById('sel-order-hasil');
+  const pending=DB.orders.filter(o=>o.status!=='selesai');
+  s.innerHTML='<option value="">— Pilih nomor order —</option>'+pending.map(o=>{
+    const p=DB.pasien.find(x=>x.id===o.pasienId);
+    return `<option value="${o.id}">${o.id} — ${p?p.nama:'?'} (${o.panels.join(', ')}) ${o.prioritas==='STAT (Cito)'?'⚡':''}</option>`;
+  }).join('');
+}
+
+function loadOrderPanel() {
+  const oid=document.getElementById('sel-order-hasil').value;
+  const area=document.getElementById('hasil-area');
+  if(!oid){area.innerHTML='';return;}
+  const order=DB.orders.find(o=>o.id===oid);
+  if(!order){area.innerHTML='';return;}
+  const p=DB.pasien.find(x=>x.id===order.pasienId);
+  order.status='proses'; DB.save(); renderOrder(); updateBadges();
+
+  let html=`<div class="alert alert-info">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <div>
+      <strong>${p?p.nama:'—'}</strong> · No. RM: <span class="rm-tag">${p?p.rm:'—'}</span> · ${p?p.jk:'—'}, ${usia(p?p.tgl:'')}
+      <br><span style="font-size:12px">Dokter Pengirim: <strong>${order.dokter||'—'}</strong> &nbsp;·&nbsp; Analis: <strong>${order.analis||'—'}</strong></span>
+    </div>
+  </div>`;
+
+  order.panels.forEach(panel=>{
+    const tests=PANELS[panel]||[];
+    html+=`<div class="rpg">
+      <div class="rpg-hdr"><svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-4"/><polyline points="20,4 12,12 8,8"/></svg>${panel}</div>
+      <div class="rrow-hdr"><span>Pemeriksaan</span><span>Nilai / Hasil</span><span>Nilai Normal</span><span>Satuan</span></div>`;
+    tests.forEach(t=>{
+      const n=NORMAL[t]||{};
+      const isK=KUAL.includes(t);
+      html+=`<div class="rrow">
+        <span class="rname">${t}</span>
+        ${isK
+          ?`<select id="val-${esc(panel)}-${esc(t)}" style="padding:6px 8px;font-size:12px;width:100%;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);font-family:'Bricolage Grotesque',sans-serif"><option value="">Pilih</option><option>Negatif</option><option>Positif</option><option>Reaktif</option><option>Non-reaktif</option></select>`
+          :`<input type="number" step="any" id="val-${esc(panel)}-${esc(t)}" placeholder="0.00" style="padding:6px 8px;font-size:13px;width:100%;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface);font-family:'Geist Mono',monospace;color:var(--text)">`}
+        <span style="font-size:12px;color:var(--text3)">${nrange(t)}</span>
+        <span style="font-size:12px;color:var(--text3)">${n.unit||'—'}</span>
+      </div>`;
+    });
+    html+='</div>';
+  });
+
+  html+=`<div class="grid-2" style="margin-top:14px">
+    <div class="fr"><label>Nama Analis / Petugas <span class="req">*</span></label><input type="text" id="hasil-petugas" value="${order.analis||''}" placeholder="Nama lengkap analis"></div>
+    <div class="fr"><label>Tanggal & Jam Pemeriksaan</label><input type="datetime-local" id="hasil-waktu" value="${new Date().toISOString().slice(0,16)}"></div>
+  </div>
+  <div class="fr"><label>Interpretasi / Catatan Analis</label><textarea id="hasil-catatan" placeholder="Tulis interpretasi atau catatan klinis dari hasil pemeriksaan ini"></textarea></div>
+  <div style="display:flex;justify-content:flex-end;gap:8px;padding-top:4px">
+    <button class="btn btn-ghost" onclick="document.getElementById('sel-order-hasil').value='';document.getElementById('hasil-area').innerHTML=''">Batal</button>
+    <button class="btn btn-primary" onclick="simpanHasil('${oid}')">
+      <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></svg>
+      Simpan & Selesaikan
+    </button>
+  </div>`;
+  area.innerHTML=html;
+}
+
+function simpanHasil(oid) {
+  const order=DB.orders.find(o=>o.id===oid);
+  if(!order) return;
+  const petugas=document.getElementById('hasil-petugas').value.trim();
+  if(!petugas){toast('Nama analis wajib diisi!','err');return;}
+  const results={};
+  order.panels.forEach(panel=>{
+    results[panel]={};
+    (PANELS[panel]||[]).forEach(t=>{
+      const el=document.getElementById('val-'+esc(panel)+'-'+esc(t));
+      if(el) results[panel][t]=el.value;
+    });
+  });
+  const waktu=document.getElementById('hasil-waktu').value;
+  const h={
+    id:'H-'+Date.now(), orderId:oid, pasienId:order.pasienId, panels:order.panels,
+    results, petugas, dokter:order.dokter||'—',
+    catatan:document.getElementById('hasil-catatan').value,
+    tgl:waktu?new Date(waktu).toISOString():new Date().toISOString(), status:'selesai'
+  };
+  DB.hasil.push(h); order.status='selesai';
+  const p=DB.pasien.find(x=>x.id===order.pasienId);
+  DB.save(); addAct(`Hasil selesai: ${oid} — ${p?p.nama:'?'} · Dokter: ${order.dokter||'—'} · Analis: ${petugas}`);
+  document.getElementById('sel-order-hasil').value='';
+  document.getElementById('hasil-area').innerHTML='';
+  populateOrderHasilSel(); renderRiwayat(); renderDash(); updateBadges();
+  toast(`Hasil lab ${oid} berhasil disimpan`);
+}
+
+// ===================== RIWAYAT =====================
+function renderRiwayat() {
+  const q=(document.getElementById('q-riwayat').value||'').toLowerCase();
+  let list=[...DB.hasil].reverse().filter(h=>{
+    const p=DB.pasien.find(x=>x.id===h.pasienId);
+    return !q||(p?p.nama.toLowerCase().includes(q):false)||h.orderId.toLowerCase().includes(q);
+  });
+  document.getElementById('riwayat-count').textContent=`${list.length} dari ${DB.hasil.length} hasil`;
+  const tb=document.getElementById('riwayat-tb');
+  if(!list.length){tb.innerHTML=`<tr><td colspan="8"><div class="empty-st"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg><p>Belum ada hasil laboratorium tersimpan</p></div></td></tr>`;return;}
+  tb.innerHTML=list.map(h=>{
+    const p=DB.pasien.find(x=>x.id===h.pasienId);
+    return `<tr>
+      <td><span class="rm-tag">${h.orderId}</span></td>
+      <td>${p?`<div style="font-weight:600">${p.nama}</div><div style="font-size:11px;color:var(--text3)">${p.rm}</div>`:'—'}</td>
+      <td style="max-width:180px"><div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px">${h.panels.join(', ')}</div></td>
+      <td class="mono" style="font-size:12px">${fmtDT(h.tgl)}</td>
+      <td style="font-size:12px">${h.dokter||'—'}</td>
+      <td style="font-size:12px;font-weight:500">${h.petugas}</td>
+      <td><span class="badge badge-selesai">Selesai</span></td>
+      <td>
+        <button class="btn btn-sm btn-secondary" onclick="lihatDetail('${h.id}')">Lihat Hasil</button>
+        <button class="btn btn-sm btn-danger" onclick="hapusHasil('${h.id}')" style="margin-left:4px">Hapus</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+let currentDetail=null;
+function lihatDetail(hid) {
+  currentDetail=hid;
+  const h=DB.hasil.find(x=>x.id===hid);
+  if(!h) return;
+  const p=DB.pasien.find(x=>x.id===h.pasienId);
+  const o=DB.orders.find(x=>x.id===h.orderId);
+  document.getElementById('det-title').textContent='Hasil Lab — '+h.orderId;
+  document.getElementById('det-sub').textContent=fmtDT(h.tgl)+' · Analis: '+h.petugas;
+  let html=`<div class="info-grid" style="margin-bottom:18px">
+    <div class="info-cell"><div class="info-lbl">Pasien</div><div class="info-val">${p?p.nama:'—'}</div></div>
+    <div class="info-cell"><div class="info-lbl">No. Rekam Medis</div><div class="info-val"><span class="rm-tag">${p?p.rm:'—'}</span></div></div>
+    <div class="info-cell"><div class="info-lbl">Tgl Lahir / Usia</div><div class="info-val">${p?fmtD(p.tgl)+' ('+usia(p.tgl)+')':'—'}</div></div>
+    <div class="info-cell"><div class="info-lbl">Jenis Kelamin</div><div class="info-val">${p?p.jk:'—'}</div></div>
+    <div class="info-cell"><div class="info-lbl">Dokter Pengirim</div><div class="info-val">${h.dokter||o&&o.dokter||'—'}</div></div>
+    <div class="info-cell"><div class="info-lbl">Analis Pemeriksa</div><div class="info-val" style="color:var(--teal);font-weight:700">${h.petugas}</div></div>
+  </div>`;
+  h.panels.forEach(panel=>{
+    const results=h.results[panel]||{};
+    let abnormal=false;
+    (PANELS[panel]||[]).forEach(t=>{if(fcls(t,results[t]))abnormal=true;});
+    html+=`<div class="rpg" style="margin-bottom:14px">
+      <div class="rpg-hdr">
+        <svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-4"/><polyline points="20,4 12,12 8,8"/></svg>
+        ${panel}
+        ${abnormal?'<span class="badge badge-cito" style="margin-left:auto">⚠ Ada Nilai Abnormal</span>':''}
+      </div>
+      <div class="rrow-hdr"><span>Pemeriksaan</span><span>Hasil</span><span>Nilai Normal</span><span>Satuan</span></div>`;
+    (PANELS[panel]||[]).forEach(t=>{
+      const val=results[t]||'—';
+      const n=NORMAL[t]||{};
+      const fc=fcls(t,val); const fl=flbl(t,val);
+      html+=`<div class="rrow">
+        <span class="rname">${t}</span>
+        <span class="${fc} mono">${val} <sup style="font-size:10px">${fl}</sup></span>
+        <span style="font-size:12px;color:var(--text3)">${nrange(t)}</span>
+        <span style="font-size:12px;color:var(--text3)">${n.unit||'—'}</span>
+      </div>`;
+    });
+    html+='</div>';
+  });
+  if(h.catatan) html+=`<div style="background:var(--surface2);border-radius:var(--radius-sm);padding:12px 14px;margin-top:4px;font-size:13px;border:1px solid var(--border)"><strong>Catatan Analis:</strong><p style="margin-top:6px;color:var(--text2);line-height:1.6">${h.catatan}</p></div>`;
+  document.getElementById('det-body').innerHTML=html;
+  openModal('modal-detail');
+}
+
+function hapusHasil(id) {
+  if(!confirm('Hapus hasil lab ini? Order terkait akan dikembalikan ke pending.')) return;
+  const h=DB.hasil.find(x=>x.id===id);
+  DB.hasil=DB.hasil.filter(x=>x.id!==id);
+  if(h){const o=DB.orders.find(x=>x.id===h.orderId);if(o)o.status='pending';}
+  DB.save(); renderRiwayat(); renderDash(); updateBadges();
+  toast('Hasil lab dihapus','err');
+}
+
+function cetakHasil() { window.print(); }
+
+// ===================== LAPORAN =====================
+function renderLaporan() {
+  const el=document.getElementById('laporan-content');
+  const pc={};
+  DB.orders.forEach(o=>o.panels.forEach(p=>{pc[p]=(pc[p]||0)+1;}));
+  const ps=Object.entries(pc).sort((a,b)=>b[1]-a[1]);
+  const dokt={};
+  DB.orders.forEach(o=>{ if(o.dokter){ dokt[o.dokter]=(dokt[o.dokter]||0)+1; }});
+  const ds=Object.entries(dokt).sort((a,b)=>b[1]-a[1]);
+  const analist={};
+  DB.hasil.forEach(h=>{ if(h.petugas){ analist[h.petugas]=(analist[h.petugas]||0)+1; }});
+  const as=Object.entries(analist).sort((a,b)=>b[1]-a[1]);
+
+  el.innerHTML=`
+    <div class="grid-3" style="margin-bottom:20px">
+      <div class="card"><div class="card-hdr">Total Pasien</div><div class="stat-num">${DB.pasien.length}</div></div>
+      <div class="card"><div class="card-hdr">Total Order</div><div class="stat-num">${DB.orders.length}</div></div>
+      <div class="card"><div class="card-hdr">Total Hasil</div><div class="stat-num">${DB.hasil.length}</div></div>
+    </div>
+    <div class="grid-3" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-hdr"><svg viewBox="0 0 24 24"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>Panel Terbanyak</div>
+        ${ps.length?ps.map((e,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
+          <span style="font-size:11px;color:var(--text3);width:18px;text-align:right;font-family:'Geist Mono',monospace">${i+1}</span>
+          <span style="flex:1;font-weight:500">${e[0]}</span>
+          <span style="color:var(--teal);font-weight:700;font-family:'Geist Mono',monospace">${e[1]}x</span>
+        </div>`).join(''):'<div style="color:var(--text3);font-size:13px;padding:16px 0">Belum ada data</div>'}
+      </div>
+      <div class="card">
+        <div class="card-hdr"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>Dokter Pengirim Aktif</div>
+        ${ds.length?ds.slice(0,6).map((e,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
+          <span style="font-size:11px;color:var(--text3);width:18px;text-align:right;font-family:'Geist Mono',monospace">${i+1}</span>
+          <span style="flex:1;font-weight:500">${e[0]}</span>
+          <span style="color:var(--amber);font-weight:700;font-family:'Geist Mono',monospace">${e[1]}x</span>
+        </div>`).join(''):'<div style="color:var(--text3);font-size:13px;padding:16px 0">Belum ada data</div>'}
+      </div>
+      <div class="card">
+        <div class="card-hdr"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Analis Pemeriksa</div>
+        ${as.length?as.map((e,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
+          <span style="font-size:11px;color:var(--text3);width:18px;text-align:right;font-family:'Geist Mono',monospace">${i+1}</span>
+          <span style="flex:1;font-weight:500">${e[0]}</span>
+          <span style="color:var(--green);font-weight:700;font-family:'Geist Mono',monospace">${e[1]}x</span>
+        </div>`).join(''):'<div style="color:var(--text3);font-size:13px;padding:16px 0">Belum ada data</div>'}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Ringkasan Status Order</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:4px">
+        ${['pending','proses','selesai'].map(s=>{
+          const cnt=DB.orders.filter(o=>o.status===s).length;
+          return `<div style="text-align:center;padding:16px;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border)">
+            <span class="badge badge-${s}">${s==='selesai'?'Selesai':s==='proses'?'Diproses':'Pending'}</span>
+            <div style="font-size:28px;font-weight:700;font-family:'Geist Mono',monospace;margin-top:8px">${cnt}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div style="margin-top:14px;font-size:13px;color:var(--text3)">
+        Tingkat penyelesaian: <strong style="color:var(--green)">${DB.orders.length?Math.round(DB.orders.filter(o=>o.status==='selesai').length/DB.orders.length*100):0}%</strong>
+      </div>
+    </div>`;
+}
+
+// ===================== EXPORT / RESET =====================
+function eksporData() {
+  const data={pasien:DB.pasien,orders:DB.orders,hasil:DB.hasil,exportedAt:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;
+  a.download='LabGenesis-export-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click(); URL.revokeObjectURL(url);
+  toast('Data berhasil diekspor sebagai JSON');
+}
+
+function confirmReset() {
+  if(!confirm('PERHATIAN: Semua data akan dihapus permanen. Lanjutkan?')) return;
+  if(!confirm('Konfirmasi sekali lagi: hapus SEMUA data?')) return;
+  DB.pasien=[];DB.orders=[];DB.hasil=[];DB.activity=[];
+  DB.save(); renderDash(); updateBadges();
+  showSection('dashboard');
+  toast('Semua data telah direset','err');
+}
+
+// ===================== INIT =====================
+document.getElementById('tb-date').textContent = new Date().toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+buildPanelChecks();
+renderDash();
+updateBadges();
+</script>
+</body>
+</html>
